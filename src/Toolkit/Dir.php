@@ -131,7 +131,7 @@ class Dir
 
         foreach ($items as $item) {
             $root     = $dir . '/' . $item;
-            $entry    = $path !== null ? $path . '/' . $item: $item;
+            $entry    = $path !== null ? $path . '/' . $item : $item;
             $result[] = $entry;
 
             if ($recursive === true && is_dir($root) === true) {
@@ -280,7 +280,7 @@ class Dir
             throw new Exception('The parent directory cannot be created');
         }
 
-        return rename($old, $new);
+        return empty(shell_exec('mv ' . $old . ' ' . $new));
     }
 
     /**
@@ -314,7 +314,7 @@ class Dir
         $ignore = array_merge($ignore, ['.', '..']);
 
         // scan for all files and dirs
-        $result = array_values((array)array_diff(scandir($dir), $ignore));
+        $result = array_values((array) array_diff(scandir($dir), $ignore));
 
         // add absolute paths
         if ($absolute === true) {
