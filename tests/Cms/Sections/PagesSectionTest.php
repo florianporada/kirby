@@ -2,11 +2,12 @@
 
 namespace Kirby\Cms;
 
-use Kirby\Toolkit\I18n;
 use PHPUnit\Framework\TestCase;
 
 class PagesSectionTest extends TestCase
 {
+    protected $app;
+
     public function setUp(): void
     {
         App::destroy();
@@ -240,6 +241,28 @@ class PagesSectionTest extends TestCase
         $this->assertFalse($section->sortable());
     }
 
+    public function testFlip()
+    {
+        $page = new Page([
+            'slug'     => 'test',
+            'children' => [
+                ['slug' => 'subpage-1', 'content' => ['title' => 'C']],
+                ['slug' => 'subpage-2', 'content' => ['title' => 'A']],
+                ['slug' => 'subpage-3', 'content' => ['title' => 'B']]
+            ]
+        ]);
+
+        $section = new Section('pages', [
+            'name'  => 'test',
+            'model' => $page,
+            'flip'  => true
+        ]);
+
+        $this->assertEquals('B', $section->data()[0]['text']);
+        $this->assertEquals('A', $section->data()[1]['text']);
+        $this->assertEquals('C', $section->data()[2]['text']);
+    }
+
     public function sortableStatusProvider()
     {
         return [
@@ -299,7 +322,7 @@ class PagesSectionTest extends TestCase
         $data = $section->data();
 
         // existing covers
-        $this->assertContains('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw', $data[0]['image']['cards']['url']);
+        $this->assertStringContainsString('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw', $data[0]['image']['cards']['url']);
 
         // non-existing covers
         $this->assertNull($data[2]['image']['cards']['url'] ?? null);
@@ -367,7 +390,7 @@ class PagesSectionTest extends TestCase
             'help'  => 'Test'
         ]);
 
-        $this->assertEquals('Test', $section->help());
+        $this->assertEquals('<p>Test</p>', $section->help());
 
         // translated help
         $section = new Section('pages', [
@@ -379,6 +402,6 @@ class PagesSectionTest extends TestCase
             ]
         ]);
 
-        $this->assertEquals('Information', $section->help());
+        $this->assertEquals('<p>Information</p>', $section->help());
     }
 }

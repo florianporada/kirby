@@ -2,13 +2,17 @@
 
 namespace Kirby\Cms;
 
-require_once(__DIR__ . '/../mocks.php');
+require_once __DIR__ . '/../mocks.php';
 
 /**
  * @coversDefaultClass Kirby\Cms\Auth
  */
 class AuthProtectionTest extends TestCase
 {
+    protected $app;
+    protected $auth;
+    protected $fixtures;
+
     public function setUp(): void
     {
         $this->app = new App([

@@ -2,11 +2,12 @@
 
 namespace Kirby\Cms;
 
-use Kirby\Toolkit\I18n;
 use PHPUnit\Framework\TestCase;
 
 class FilesSectionTest extends TestCase
 {
+    protected $app;
+
     public function setUp(): void
     {
         App::destroy();
@@ -122,6 +123,31 @@ class FilesSectionTest extends TestCase
         $this->assertEquals('pages/b/files', $section->upload()['api']);
     }
 
+    public function testParentCollectionFail()
+    {
+        $this->expectException('Exception');
+        $this->expectExceptionMessage('The parent for the section "files" has to be a page, site or user object');
+
+        $app = new App([
+            'site' => [
+                'children' => [
+                    [
+                        'slug' => 'a'
+                    ],
+                    [
+                        'slug' => 'b'
+                    ]
+                ]
+            ]
+        ]);
+
+        $section = new Section('files', [
+            'model'  => $app->page('a'),
+            'parent' => 'site.index'
+        ]);
+        $section->parentModel();
+    }
+
     public function testEmpty()
     {
         $section = new Section('files', [
@@ -204,7 +230,6 @@ class FilesSectionTest extends TestCase
 
     public function testHelp()
     {
-
         // single help
         $section = new Section('files', [
             'name'  => 'test',
@@ -212,7 +237,7 @@ class FilesSectionTest extends TestCase
             'help'  => 'Test'
         ]);
 
-        $this->assertEquals('Test', $section->help());
+        $this->assertEquals('<p>Test</p>', $section->help());
 
         // translated help
         $section = new Section('files', [
@@ -224,7 +249,7 @@ class FilesSectionTest extends TestCase
             ]
         ]);
 
-        $this->assertEquals('Information', $section->help());
+        $this->assertEquals('<p>Information</p>', $section->help());
     }
 
     public function testSortBy()
@@ -319,5 +344,33 @@ class FilesSectionTest extends TestCase
         ]);
 
         $this->assertFalse($section->sortable());
+    }
+
+    public function testFlip()
+    {
+        $model = new Page([
+            'slug'  => 'test',
+            'files' => [
+                [
+                    'filename' => 'c.jpg'
+                ],
+                [
+                    'filename' => 'a.jpg'
+                ],
+                [
+                    'filename' => 'b.jpg'
+                ]
+            ]
+        ]);
+
+        $section = new Section('files', [
+            'name'  => 'test',
+            'model' => $model,
+            'flip'  => true
+        ]);
+
+        $this->assertEquals('c.jpg', $section->data()[0]['filename']);
+        $this->assertEquals('b.jpg', $section->data()[1]['filename']);
+        $this->assertEquals('a.jpg', $section->data()[2]['filename']);
     }
 }

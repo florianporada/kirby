@@ -10,11 +10,12 @@
       name,
       placeholder,
       required,
-      step,
-      value
+      step
     }"
+    :value="number"
     class="k-number-input"
     type="number"
+    @keydown.cmd.s="clean"
     v-on="listeners"
   >
 </template>
@@ -46,20 +47,27 @@ export default {
   },
   data() {
     return {
+      number: this.format(this.value),
+      timeout: null,
       listeners: {
         ...this.$listeners,
-        input: (event) => this.onInput(event.target.value)
+        input: (event) => this.onInput(event.target.value),
+        blur: this.onBlur,
       }
     }
   },
   watch: {
-    value() {
-      this.onInvalid();
+    value(value) {
+      this.number = value;
+    },
+    number: {
+      immediate: true,
+      handler() {
+        this.onInvalid();
+      }
     }
   },
   mounted() {
-    this.onInvalid();
-
     if (this.$props.autofocus) {
       this.focus();
     }
@@ -69,6 +77,46 @@ export default {
     }
   },
   methods: {
+    decimals() {
+      const step = Number(this.step || 0);
+
+      if (Math.floor(step) === step) {
+        return 0;
+      }
+
+      return step.toString().split(".")[1].length || 0;
+    },
+    format(value) {
+      if (isNaN(value) || value === "") {
+        return "";
+      }
+
+      const decimals = this.decimals();
+
+      if (decimals) {
+        value = parseFloat(value).toFixed(decimals);
+      } else if (Number.isInteger(this.step)) {
+        value = parseInt(value);
+      } else {
+        value = parseFloat(value);
+      }
+
+      return value;
+    },
+    clean() {
+      this.number = this.format(this.number);
+    },
+    emit(value) {
+      value = parseFloat(value);
+
+      if (isNaN(value)) {
+        value = "";
+      }
+
+      if (value !== this.value) {
+        this.$emit("input", value);
+      }
+    },
     focus() {
       this.$refs.input.focus();
     },
@@ -76,13 +124,12 @@ export default {
       this.$emit("invalid", this.$v.$invalid, this.$v);
     },
     onInput(value) {
-      // don't convert empty values or the beginning of
-      // a negative number to a Number
-      if (value !== null && value !== "" && value !== "-" && value !== "-0") {
-        value = Number(value);
-      }
-
-      this.$emit("input", value);
+      this.number = value;
+      this.emit(value);
+    },
+    onBlur() {
+      this.clean();
+      this.emit(this.number);
     },
     select() {
       this.$refs.input.select();

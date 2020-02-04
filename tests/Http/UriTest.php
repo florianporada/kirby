@@ -7,6 +7,8 @@ use PHPUnit\Framework\TestCase;
 class UriTest extends TestCase
 {
     protected $_SERVER = null;
+    protected $example1;
+    protected $example2;
 
     protected function setUp(): void
     {
@@ -96,7 +98,7 @@ class UriTest extends TestCase
 
     public function testValidScheme()
     {
-        $url = new Uri;
+        $url = new Uri();
 
         $url->setScheme('http');
         $this->assertEquals('http', $url->scheme());
@@ -110,13 +112,13 @@ class UriTest extends TestCase
         $this->expectException('Kirby\Exception\InvalidArgumentException');
         $this->expectExceptionMessage('Invalid URL scheme: abc');
 
-        $url = new Uri;
+        $url = new Uri();
         $url->setScheme('abc');
     }
 
     public function testValidHost()
     {
-        $url = new Uri;
+        $url = new Uri();
 
         $url->setHost('getkirby.com');
         $this->assertEquals('getkirby.com', $url->host());
@@ -136,7 +138,7 @@ class UriTest extends TestCase
 
     public function testIsNotAbsolute()
     {
-        $url = new Uri;
+        $url = new Uri();
         $this->assertFalse($url->isAbsolute());
     }
 
@@ -249,7 +251,7 @@ class UriTest extends TestCase
 
     public function testBaseWithoutHost()
     {
-        $url = new Uri;
+        $url = new Uri();
         $this->assertEquals(null, $url->base());
     }
 

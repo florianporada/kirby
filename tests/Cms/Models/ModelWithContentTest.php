@@ -11,12 +11,17 @@ class ExtendedModelWithContent extends ModelWithContent
 
     protected function commit(string $action, array $arguments, \Closure $callback)
     {
-        return;
+        // nothing to commit in the test
     }
 
     public function contentFileName(): string
     {
         return 'test.txt';
+    }
+
+    public function permissions()
+    {
+        return null;
     }
 
     public function root(): ?string
